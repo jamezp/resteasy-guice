@@ -5,21 +5,28 @@
 
 version: 2
 updates:
-  - package-ecosystem: 'maven'
-    directory: '/'
+  - package-ecosystem: "maven"
+    directory: "/"
     schedule:
-      interval: 'daily'
+      interval: "daily"
     ignore:
+      # Keep the following on the same major.minor releases
+      - dependency-name: 'jakarta.platform:*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
       - dependency-name: 'org.jboss.resteasy:*'
         update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: 'org.junit*'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: 'org.jboss.logmanager:jboss-logmanager'
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
     open-pull-requests-limit: 10
-  - package-ecosystem: 'github-actions'
+  - package-ecosystem: "github-actions"
     # Workflow files stored in the
     # default location of `.github/workflows`
-    directory: '/'
+    directory: "/"
     schedule:
-      interval: 'daily'
+      interval: "daily"
     groups:
       dependencies:
         patterns:
-          - '*'
+          - "*"

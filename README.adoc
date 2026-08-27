@@ -84,15 +84,14 @@ This can take a comma delimited list of class names that are Guice Modules.
 Add the `RequestScopeModule` to your modules to allow objects to be scoped to the HTTP request by adding the `@RequestScoped` annotation to your fields in resource classes.
 All the objects injectable via the `@Context` annotation are  also injectable, except `ServletConfig` and `ServletContext`.
 Note that `RequestScopeModule` will already be added if any of your modules extends `com.google.inject.servlet.ServletModule`.
-In such cases you should not add it again to avoid injector creation errors. 
+In such cases you should not add it again to avoid injector creation errors.
 
 [source,java]
 ----
 
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 
 import dev.resteasy.guice.RequestScoped;
 
@@ -109,7 +108,7 @@ Add the `JaxrsModule` to bind `jakarta.ws.rs.ext.RuntimeDelegate`, `jakarta.ws.r
 == Configuring Stage
 
 You can configure the stage Guice uses to deploy your modules by specific a context param, `resteasy.guice.stage`.
-If this value is not specified, RESTEasy uses whatever Guice's default is. 
+If this value is not specified, RESTEasy uses whatever Guice's default is.
 
 [source,xml]
 ----
@@ -162,7 +161,6 @@ Override `getStage(ServletContext)` to set the Stage yourself.
 [source,xml]
 ----
 
-
 <web-app>
     <!-- other tags omitted -->
     <listener>
@@ -181,22 +179,26 @@ public class MyServletContextListener extends GuiceResteasyBootstrapServletConte
     protected List<? extends Module> getModules(ServletContext context) {
         return List.of(new JpaPersistModule("consulting_hours"), new MyModule());
     }
-    
+
     @Override
     public void withInjector(Injector injector) {
         injector.getInstance(PersistService.class).start();
     }
 }
 ----
+
 == Migrating from prior editions of RESTEasy Guice
+
 The group name and package name have both changed. If you are migrating from prior editions of RESTEasy Guice, you will need to update your dependencies and imports.
 
 The new group name is 'dev.resteasy.guice' and the new package name is 'dev.resteasy.guice'.
 
 === Dependencies
+
 For example code for the dependencies see: https://central.sonatype.com/artifact/dev.resteasy.guice/resteasy-guice
 
 === Imports
+
 .Bulleted
 * Previous package name: org.jboss.resteasy.plugins.guice.
 * Current package name: dev.resteasy.guice
@@ -222,3 +224,83 @@ Or changing the import statement in a custom listener to:
 ----
 import dev.resteasy.guice.GuiceResteasyBootstrapServletContextListener;
 ----
+
+== Releasing
+
+Releasing the project requires permission to deploy to Maven Central see https://central.sonatype.org/publish/requirements/[Maven Central Release Requirements].
+Once everything is setup, you simply need to run the `./release.sh` script. There are two required parameters:
+
+. `-r` or `--release` which is the version you want to release
+. `-d` or `--development` which is the next development version.
+
+By default the release version cannot contain `SNAPSHOT` and the development version, must container `SNAPSHOT`.
+
+[source,bash]
+----
+.Example Command
+----
+./release -r 1.0.0.Final -d 1.0.1.Final-SNAPSHOT
+----
+----
+
+=== Supported Arguments
+
+|===
+| Argument                                                                                                          | Requires Value | Description
+
+| `-d`, `--development`
+
+| Yes
+
+| The next version for the development cycle.
+
+| `-f`, `--force`
+
+| No
+
+| Forces to allow a SNAPSHOT suffix in release version and not require one for the development version.
+
+| `-h`, `--help`
+
+| N/A
+
+| Displays this help
+
+| `--notes-start-tag`
+
+| Unused
+
+| Passes the `--notes-from-tag` and the argument to the `gh create release` command.
+
+| `-p`, `--prerelease`
+
+| Unused
+
+| Passes the `--prerelease` to the `gh create release` command.
+
+| `-r`, `--release`
+
+| Yes
+
+| The version to be released. Also used for the tag.
+
+| `--dry-run`
+
+| No
+
+| Executes the release in as a dry-run. Nothing will be updated or pushed.
+
+| `--no-push`
+
+| No
+
+| Executes the release in, but doesn't actually push the changes to GitHub or publish the release on Maven Central.
+
+| `-v`, `--verbose`
+
+| No
+
+| Prints verbose output.
+|===
+
+Any additional arguments are considered arguments for the Maven command.

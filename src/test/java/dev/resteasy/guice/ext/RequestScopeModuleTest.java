@@ -22,15 +22,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import dev.resteasy.guice.ModuleProcessor;
+import dev.resteasy.guice.RequestScoped;
+
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-
-import dev.resteasy.guice.ModuleProcessor;
-import dev.resteasy.guice.RequestScoped;
 
 public class RequestScopeModuleTest {
     private static NettyJaxrsServer server;
