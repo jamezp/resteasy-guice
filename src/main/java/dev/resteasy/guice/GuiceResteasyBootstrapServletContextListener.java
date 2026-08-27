@@ -23,13 +23,13 @@ import org.jboss.resteasy.spi.Registry;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import dev.resteasy.guice._private.LogMessages;
+import dev.resteasy.guice._private.Messages;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
-
-import dev.resteasy.guice._private.LogMessages;
-import dev.resteasy.guice._private.Messages;
 
 public class GuiceResteasyBootstrapServletContextListener extends ResteasyBootstrap implements ServletContextListener {
 

@@ -9,18 +9,62 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>dev.resteasy.tools</groupId>
-        <artifactId>resteasy-parent</artifactId>
-        <version>3</version>
-        <relativePath/>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-parent</artifactId>
+        <version>53</version>
+        <relativePath />
     </parent>
     <groupId>dev.resteasy.guice</groupId>
     <artifactId>resteasy-guice</artifactId>
     <version>1.0.0.Alpha2-SNAPSHOT</version>
     <name>RESTEasy Guice</name>
-    <description/>
+    <description>RESTEasy Guice Integration</description>
+    <url>https://resteasy.dev</url>
+
+    <organization>
+        <name>RESTEasy Community</name>
+        <url>https://resteasy.dev</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>https://repository.jboss.org/licenses/apache-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>jamezp</id>
+            <name>James R. Perkins</name>
+            <email>jperkins@ibm.com</email>
+            <organization>IBM</organization>
+            <roles>
+                <role>project-owner</role>
+            </roles>
+            <timezone>-8</timezone>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/resteasy/resteasy-guice.git</connection>
+        <developerConnection>scm:git:git@github.com:resteasy/resteasy-guice.git</developerConnection>
+        <url>https://github.com/resteasy/resteasy-guice/tree/main/</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/resteasy/resteasy-guice/issues</url>
+    </issueManagement>
 
     <properties>
+        <!-- Compile to Java 17 -->
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <!-- print logs to file by default -->
+        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+
         <!-- Dependency Versions, keep in alphabetical order -->
         <version.jakarta.ee>10.0.0</version.jakarta.ee>
         <!-- Override transitive dependency coming in via Guice. The Guava version brought in by Guice has a security vulnerability -->
@@ -29,8 +73,31 @@
         <version.com.google.inject.guice>7.0.0</version.com.google.inject.guice>
         <version.org.jboss.logging>3.6.2.Final</version.org.jboss.logging>
         <version.org.jboss.logging.jboss-logging-tools>3.0.4.Final</version.org.jboss.logging.jboss-logging-tools>
+        <version.org.jboss.logmanager>3.2.2.Final</version.org.jboss.logmanager>
         <version.org.jboss.resteasy>6.2.15.Final</version.org.jboss.resteasy>
         <version.org.junit>5.13.4</version.org.junit>
+
+        <!-- Plugins versions -->
+        <version.spotless-maven-plugin>3.10.1</version.spotless-maven-plugin>
+
+        <!-- Please note this is an undocumented and fragile property as it may not work in the future.
+             However, for now it is all we have to find the root project directory. -->
+        <logging.configuration>file://${maven.multiModuleProjectDirectory}/logging.properties</logging.configuration>
+        <org.jboss.logmanager.nocolor>true</org.jboss.logmanager.nocolor>
+        <test.log.console.formatter>CONSOLE-PATTERN</test.log.console.formatter>
+
+        <!-- maven-release-plugin configuration -->
+        <autoVersionSubmodules>true</autoVersionSubmodules>
+        <releaseProfiles>central-release</releaseProfiles>
+        <signTag>true</signTag>
+        <tagNameFormat>v@{project.version}</tagNameFormat>
+        <arguments>-DskipTests</arguments>
+        <!-- Do not push changes by default when using the maven-release-plugin:prepare -->
+        <pushChanges>false</pushChanges>
+        <!-- Use the local directory when using perform -->
+        <localCheckout>true</localCheckout>
+        <!-- Maven Central properties -->
+        <central.deploymentName>resteasy-guice-${project.version}</central.deploymentName>
     </properties>
 
     <dependencyManagement>
@@ -105,14 +172,6 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging-processor</artifactId>
-            <version>${version.org.jboss.logging.jboss-logging-tools}</version>
-            <!-- This is a compile time only requirement -->
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -125,18 +184,166 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Defined here as we set this on the surefire and failsafe configuration. This is only used for testing. -->
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+            <version>${version.org.jboss.logmanager}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.jboss.logging</groupId>
+                                <artifactId>jboss-logging-processor</artifactId>
+                                <version>${version.org.jboss.logging.jboss-logging-tools}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                            <logging.configuration>${logging.configuration}</logging.configuration>
+                            <client.log.dir>${project.build.directory}</client.log.dir>
+                            <test.log.console.formatter>${test.log.console.formatter}</test.log.console.formatter>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+            <!-- Format source files -->
             <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>net.revelc.code</groupId>
-                <artifactId>impsort-maven-plugin</artifactId>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${version.spotless-maven-plugin}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>dev.resteasy.tools</groupId>
+                        <artifactId>ide-config</artifactId>
+                        <version>4</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <skip>${skipFormatting}</skip>
+                    <upToDateChecking>
+                        <enabled>true</enabled>
+                        <indexFile>${project.basedir}/.cache/spotless-index-${version.spotless-maven-plugin}</indexFile>
+                    </upToDateChecking>
+                    <java>
+                        <eclipse>
+                            <file>eclipse-code-formatter.xml</file>
+                        </eclipse>
+                        <importOrder>
+                            <order>\#,java,javax,jakarta,org,io,dev,com,net</order>
+                        </importOrder>
+                        <removeUnusedImports>
+                            <!-- default one fails to process the classes -->
+                            <engine>cleanthat-javaparser-unnecessaryimport</engine>
+                        </removeUnusedImports>
+                        <forbidWildcardImports />
+                        <trimTrailingWhitespace />
+                        <endWithNewline />
+                        <licenseHeader>
+                            <file>license-java-asl-header</file>
+                            <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
+                            <delimiter>(\n)*^(\/\/tag.+|\/\/spotless.+|package .+;|module .+;|\/\/.+|\/\*\*.*)$</delimiter>
+                        </licenseHeader>
+                        <replaceRegex>
+                            <name>Remove wildcard imports</name>
+                            <searchRegex>^import\s+[^\*\s]+\*;$</searchRegex>
+                            <replacement>$1</replacement>
+                        </replaceRegex>
+                    </java>
+                    <formats>
+                        <format>
+                            <includes>
+                                <include>pom.xml</include>
+                                <include>src/**/*.xml</include>
+                            </includes>
+                            <trimTrailingWhitespace />
+                            <endWithNewline />
+                            <licenseHeader>
+                                <file>license-xml-asl-header</file>
+                                <!-- Delimiter is a regex which identifies the "top" of the file i.e. all above it is considered a header -->
+                                <delimiter><![CDATA[(\n)*^(<[^!?]+|<!DOCTYPE.+)$]]></delimiter>
+                                <skipLinesMatching><![CDATA[<\?xml.+\?>]]></skipLinesMatching>
+                            </licenseHeader>
+                            <indent>
+                                <spaces>true</spaces>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+                    <asciidoc>
+                        <includes>
+                            <include>**/*.adoc</include>
+                        </includes>
+
+                        <adocfmt>
+                            <normalizeListBullets>true</normalizeListBullets>
+                            <normalizeOrderedListMarkers>true</normalizeOrderedListMarkers>
+                            <ensureSourceDelimiters>true</ensureSourceDelimiters>
+                        </adocfmt>
+                    </asciidoc>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>format-check</id>
+            <build>
+                <plugins>
+                    <!-- Validate formatting -->
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>validate-format</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>color-logs</id>
+            <activation>
+                <property>
+                    <name>maven.test.redirectTestOutputToFile</name>
+                    <value>false</value>
+                </property>
+            </activation>
+            <properties>
+                <test.log.console.formatter>COLOR-PATTERN</test.log.console.formatter>
+                <org.jboss.logmanager.nocolor>false</org.jboss.logmanager.nocolor>
+            </properties>
+        </profile>
+    </profiles>
 </project>

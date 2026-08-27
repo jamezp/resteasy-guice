@@ -15,12 +15,12 @@ import jakarta.ws.rs.core.UriInfo;
 
 import org.jboss.resteasy.core.ResteasyContext;
 
+import dev.resteasy.guice.RequestScoped;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-
-import dev.resteasy.guice.RequestScoped;
 
 /**
  * Binds the {@link RequestScoped} to the current HTTP request and

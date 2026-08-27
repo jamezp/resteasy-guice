@@ -22,12 +22,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import dev.resteasy.guice.ModuleProcessor;
+
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Module;
-
-import dev.resteasy.guice.ModuleProcessor;
 
 public class JaxrsModuleTest {
     private static NettyJaxrsServer server;

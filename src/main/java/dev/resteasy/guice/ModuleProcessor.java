@@ -15,11 +15,11 @@ import org.jboss.resteasy.spi.ResourceFactory;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.util.GetRestful;
 
-import com.google.inject.Binding;
-import com.google.inject.Injector;
-
 import dev.resteasy.guice._private.LogMessages;
 import dev.resteasy.guice._private.Messages;
+
+import com.google.inject.Binding;
+import com.google.inject.Injector;
 
 public class ModuleProcessor {
 
